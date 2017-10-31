@@ -1,23 +1,25 @@
-import argparse
 import sys
+import argparse
+
 from bson.errors import InvalidId
 from bson.objectid import ObjectId
 
-# from main import SocketIOClient
 from main import socketIO_client
 
 
-def print_to_logs(action, task):
-    # TODO Write to logs here
-    pass
+def print_to_logs(action, task_id):
+    # TODO Report here
+    print action, task_id
+
 
 def run_task(task_id):
-    socketIO_client.check_conditions_of_task(task_id)
     print_to_logs('run', task_id)
+    socketIO_client.handle_run_task_if_conditions_match(task_id)
+
 
 def stop_task(task_id):
-    socketIO_client.stop_task(task_id)
     print_to_logs('stop', task_id)
+    socketIO_client.send_stop_task_request(task_id)
 
 
 if __name__ == '__main__':
@@ -29,7 +31,7 @@ if __name__ == '__main__':
 
     if args.task is not None:
         try:
-            _id = ObjectId(args.task) # Variable not used, but this test that args.task is a valid ObjectId string
+            _id = ObjectId(args.task)  # Variable not used, but this tests that args.task is a valid ObjectId string
         except InvalidId as e:
             sys.stdout.write("ERROR: {}\n".format(str(e)))
             exit(1)

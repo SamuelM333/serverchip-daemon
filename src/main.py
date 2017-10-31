@@ -1,4 +1,4 @@
-import daemon
+# import daemon
 import logging
 
 from SocketIOClient import SocketIOClient
