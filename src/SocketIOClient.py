@@ -1,5 +1,5 @@
 # from bson.json_util import dumps
-from datetime import datetime, time
+from datetime import datetime, time, date
 from bson.objectid import ObjectId
 from bson.json_util import loads
 from json import loads
@@ -90,16 +90,14 @@ class SocketIOClient(object):
             for condition in task['conditions']:
                 # Check datetime conditions, if any
                 if condition.day_hour:
-                    if WEEKDAYS[datetime.date.today().weekday()] in condition.day_hour.days:
-                        start = time(condition['day_hour']['hour']['start'][:2],
-                                     condition['day_hour']['hour']['start'][3:])
+                    if WEEKDAYS[date.today().weekday()] in condition.day_hour.days:
+                        start = time(int(condition['day_hour']['hour']['start'][:2]),
+                                     int(condition['day_hour']['hour']['start'][3:]))
 
-                        end = time(condition['day_hour']['hour']['end'][:2],
-                                   condition['day_hour']['hour']['end'][3:])
-
-                        # datetime_match = start <= datetime.now() <= end # TODO Use this
-
-                        if start <= datetime.now() <= end:
+                        end = time(int(condition['day_hour']['hour']['end'][:2]),
+                                   int(condition['day_hour']['hour']['end'][3:]))
+                        print start, datetime.now().time(), end
+                        if start <= datetime.now().time() <= end:
                             datetime_match = True
                         else:
                             print 'hour/minutes mismatch'  # TODO Remove? Or log here?

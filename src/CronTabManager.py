@@ -46,14 +46,14 @@ class CronTabManager:
         task_runner_crontab_string, task_stopper_crontab_string = CronTabManager.parse_crontab_dict(condition_dict)
 
         task_runner = self.cron.new(
-            command='python ./task_management.py run ' + task_id,
+            command='/home/ubuntu/.env/daemon/bin/python /home/ubuntu/shared/daemon/src/task_management.py run ' + task_id,
             comment='start ' + task_id
         )
 
         task_runner.setall(task_runner_crontab_string)
 
         task_stopper = self.cron.new(
-            command='python ./task_management.py stop ' + task_id,
+            command='/home/ubuntu/.env/daemon/bin/python /home/ubuntu/shared/daemon/src/task_management.py stop ' + task_id,
             comment='stop ' + task_id
         )
 
