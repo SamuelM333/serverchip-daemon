@@ -43,7 +43,7 @@ class CronTabManager:
         print condition_dict
         # TODO Check path of the script. cd $SERVERCHIP_DIR ; then run script?
 
-        task_runner_crontab_string, task_stopper_crontab_string = CronTabManager.parse_crontab_string(condition_dict)
+        task_runner_crontab_string, task_stopper_crontab_string = CronTabManager.parse_crontab_dict(condition_dict)
 
         task_runner = self.cron.new(
             command='python ./task_management.py run ' + task_id,
@@ -59,7 +59,9 @@ class CronTabManager:
 
         task_stopper.setall(task_stopper_crontab_string)
 
-        # if task_runner.is_valid() and task_stopper.is_valid():
-        #     self.cron.write()
+        if task_runner.is_valid() and task_stopper.is_valid():
+            self.cron.write()
+        else:
+            print "Not valid"
 
         return task_runner.is_valid() and task_stopper.is_valid()

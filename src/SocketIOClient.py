@@ -76,11 +76,11 @@ class SocketIOClient(object):
         self.client.emit('get_port_status_request', {'microchip_id': microchip_id})
         self.client.wait(seconds=0.1)  # TODO How to not do this?
 
-    def handle_run_task_if_conditions_match(self, payload):
-        print "payload", payload
-        task = loads(payload)
-        if task is not None:
-            task = Task.objects.get(_id=ObjectId(task['_id']['$oid']))
+    def handle_run_task_if_conditions_match(self, task_id):
+        print "payload", task_id
+        # task = loads(payload)
+        if task_id is not None:
+            task = Task.objects.get(_id=ObjectId(task_id))
             microchip = Microchip.objects.get(_id=task.microchip)
             datetime_match = False
             port_match = False
@@ -91,11 +91,11 @@ class SocketIOClient(object):
                 # Check datetime conditions, if any
                 if condition.day_hour:
                     if WEEKDAYS[datetime.date.today().weekday()] in condition.day_hour.days:
-                        start = time(condition['datetime']['hour']['start'][:2],
-                                     condition['datetime']['hour']['start'][3:])
+                        start = time(condition['day_hour']['hour']['start'][:2],
+                                     condition['day_hour']['hour']['start'][3:])
 
-                        end = time(condition['datetime']['hour']['end'][:2],
-                                   condition['datetime']['hour']['end'][3:])
+                        end = time(condition['day_hour']['hour']['end'][:2],
+                                   condition['day_hour']['hour']['end'][3:])
 
                         # datetime_match = start <= datetime.now() <= end # TODO Use this
 
@@ -178,27 +178,30 @@ class SocketIOClient(object):
         else:
             print "task not found"
 
-    def handle_new_task(self, task):
+    def handle_new_task(self, taskJson):
         # TODO Report here
 
         print 'handle_new_task'
+        task = loads(taskJson)
         print task
         for condition in task['conditions']:
-            if condition.get('datetime', False):
+            print condition
+            if condition.get('day_hour', False):
                 datetime_condition = {
-                    'start': condition['datetime']['start'],
-                    'end': condition['datetime']['end'],
-                    'day': condition['datetime']['day']
+                    'start': condition['day_hour']['hour']['start'],
+                    'end': condition['day_hour']['hour']['end'],
+                    'day': condition['day_hour']['days']
                 }
 
-                self.cronTabManager.add_task_condition(str(task['_id']), datetime_condition)
+                self.cronTabManager.add_task_condition(task['_id']['$oid'], datetime_condition)
 
             if condition.get('input_port', False):
                 self.send_new_input_port_condition(
                     task['microchip']['ip'],
-                    str(task['_id']),
+                    task['_id']['$oid'],
                     condition
                 )
+        # TODO Call here setup tasks microchip
 
     def start_main_loop(self):
         # Start listening for WS events
